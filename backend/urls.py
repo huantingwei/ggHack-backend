@@ -6,6 +6,7 @@ from backend import views
 router = DefaultRouter()
 router.register(r'services', views.ServiceViewSet)
 router.register(r'reservations', views.ReservationViewSet)
+router.register(r'create_user', views.CreateUserView)
 
 # The API urls are now determined automatically by the router.
 urlpatterns = [
