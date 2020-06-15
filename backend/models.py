@@ -12,11 +12,11 @@ from django.db import models
 # from django.contrib.auth.models import User
 
 class Service(models.Model):
-    id = models.CharField()
     name = models.CharField(max_length=100)
     address = models.TextField()
+    location = models.FloatField()
     introduction = models.TextField()
-    # how to represent timeslots 
+    rating = models.FloatField()
 
 class Reservation(models.Model):
     user = models.OneToOneField(
