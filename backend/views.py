@@ -11,14 +11,15 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from backend.models import Service, Reservation
-from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer #, UserSerializer
+from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer, UserSerializer
 from backend.permissions import IsOwnerOrReadOnly
 
 # Create your views here.
 
-class CreateUserView(CreateModelMixin, GenericViewSet):
-    queryset = get_user_model().objects.all()
-    serializer_class = UserSerializer
+# obsolete if use rest-auth
+# class CreateUserView(CreateModelMixin, GenericViewSet):
+#     queryset = get_user_model().objects.all()
+#     serializer_class = UserSerializer
 
 class ServiceViewSet(viewsets.ModelViewSet):
     """
