@@ -12,11 +12,11 @@ class User(AbstractUser):
         blank=False,
         null=False,
     )
-    username = models.CharField(max_length=50, unique=True,blank=False,null=False)
+    username = models.CharField(max_length=50, unique=False,blank=True,null=False)
     # notice the absence of a "Password field", that's built in.
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = [] 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username'] 
 
 class Service(models.Model):
     CLINIC = 'CL' 
@@ -40,16 +40,13 @@ class Service(models.Model):
     longitude = models.FloatField()
     latitude = models.FloatField()
     rating = models.FloatField()
-    # no default field for image
-    reservations = models.ManyToMany(
-        Reservation,
-        on_delete = models.CASCADE
-    )
+    image = models.URLField()
+    # discard `reservations` field because it could be queried from Reservation
 
     # how to represent capacity and popularTimes? 
 
 class Reservation(models.Model):
-    user = models.ForeignKey(
+    customer = models.ForeignKey(
         User,
         on_delete = models.CASCADE
     )

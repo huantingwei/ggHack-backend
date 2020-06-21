@@ -17,14 +17,14 @@ class UserSerializer(serializers.ModelSerializer):
     #     return user
 
 
-class ServiceSerializer(serializers.HyperlinkedModelSerializer):
+class ServiceSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Service
-        fields = ['url', 'id', 'name', 'address', 'description']
+        fields = ['id', 'name', 'address', 'introduction', 'type', 'longitude', 'latitude', 'rating']
 
 class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ['url', 'id', 'user', 'service', 'start_time', 'end_time']
+        fields = ['id', 'customer', 'service', 'startTime', 'endTime']
