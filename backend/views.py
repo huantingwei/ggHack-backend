@@ -5,13 +5,13 @@ from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
 
-from rest_framework import viewsets, generics, permissions, renderers, mixins
+from rest_framework import viewsets, generics, permissions, renderers, mixins, filters
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from backend.models import Service, Reservation
-from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer, UserSerializer
+from backend.models import Service, Reservation, CapacityTable
+from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer, CapacitySerializer
 from backend.permissions import IsOwnerOrReadOnly
 
 # Create your views here.
@@ -39,3 +39,22 @@ class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
     # permission_classes = IsOwnerOrReadOnly
     queryset = Reservation.objects.all()
+
+class CapacityTableViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list`, `create`, `retrieve`, `update`, and `destroy` actions.
+    """
+    serializer_class = CapacitySerializer
+    # permission_classes = IsOwnerOrReadOnly
+    queryset = CapacityTable.objects.all()
+    
+class ReservationList(generics.ListAPIView):
+    serializer_class = ReservationSerializer
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the purchases for
+        the user as determined by the username portion of the URL.
+        """
+        userId = self.kwargs['user']
+        return Reservation.objects.filter(user_id=userId)

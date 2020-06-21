@@ -1,3 +1,4 @@
+from django.conf.urls import url
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from backend import views
@@ -6,9 +7,13 @@ from backend import views
 router = DefaultRouter()
 router.register(r'services', views.ServiceViewSet)
 router.register(r'reservations', views.ReservationViewSet)
+router.register(r'capacityTable', views.CapacityTableViewSet)
+
+
 # router.register(r'create_user', views.CreateUserView)
 
 # The API urls are now determined automatically by the router.
 urlpatterns = [
     path('', include(router.urls)),
+    #url('^purchases/(?P<user>.+)/$', views.ReservationList.as_view()),
 ]

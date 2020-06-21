@@ -80,9 +80,19 @@ WSGI_APPLICATION = 'ross.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    #}
+
+    'default':{
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'ggHack',                       # Or path to database file if using sqlite3.
+        'USER': 'root',                       # Not used with sqlite3.
+        'PASSWORD': 'ggHack2020',               # Not used with sqlite3.
+        'HOST': "127.0.0.1",                           # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '3306',                           # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -127,14 +137,14 @@ STATIC_URL = '/static/'
 
 # add pagination
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ], 
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    # 'PAGE_SIZE': 10
+    #DEFAULT_AUTHENTICATION_CLASSES': [
+    #    'rest_framework.authentication.TokenAuthentication',
+    #], 
+    #'DEFAULT_PERMISSION_CLASSES': [
+    #    'rest_framework.permissions.IsAuthenticated',
+    #],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 # required by rest_auth/all-auth

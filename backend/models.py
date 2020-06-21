@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager
 from django.db import models
+from django_mysql.models import ListCharField
 
 # Create your models here.
 
@@ -17,6 +18,10 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = [] 
+
+    def __str__(self):
+        return self.username
+
 
 class Service(models.Model):
     CLINIC = 'CL' 
@@ -43,6 +48,10 @@ class Service(models.Model):
     image = models.URLField()
 
     # how to represent capacity and popularTimes? 
+    maxCapacity = models.IntegerField(default=10)
+
+    def __str__(self):
+        return self.name
 
 class Reservation(models.Model):
     user = models.ForeignKey(
@@ -69,3 +78,49 @@ class Reservation(models.Model):
         choices=STATUS,
         default=PENDING
     )
+
+    def __str__(self):
+        return self.user.username + ' ' + self.service.name
+
+class CapacityTable(models.Model):
+    service = models.ForeignKey(
+        Service,
+        on_delete = models.CASCADE
+    )
+    # Suppose opening time: 12:00 - 20:00 
+    mon = ListCharField(
+        base_field = models.CharField(max_length=5),
+        size=8,
+        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
+    )
+    tue = ListCharField(
+        base_field = models.CharField(max_length=5),
+        size=8,
+        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
+    )
+    wed = ListCharField(
+        base_field = models.CharField(max_length=5),
+        size=8,
+        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
+    )
+    thu = ListCharField(
+        base_field = models.CharField(max_length=5),
+        size=8,
+        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
+    )
+    fri = ListCharField(
+        base_field = models.CharField(max_length=5),
+        size=8,
+        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
+    )
+    sat = ListCharField(
+        base_field = models.CharField(max_length=5),
+        size=8,
+        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
+    )
+    sun = ListCharField(
+        base_field = models.CharField(max_length=5),
+        size=8,
+        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
+    )
+
