@@ -3,7 +3,8 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import CreateModelMixin
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-
+import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, generics, permissions, renderers, mixins, filters
 from rest_framework.decorators import api_view, action
@@ -39,6 +40,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
     # permission_classes = IsOwnerOrReadOnly
     queryset = Reservation.objects.all()
+    filter_backends = (DjangoFilterBackend, )
+    filter_fields = ('user',)
 
 class CapacityTableViewSet(viewsets.ModelViewSet):
     """
@@ -48,13 +51,3 @@ class CapacityTableViewSet(viewsets.ModelViewSet):
     # permission_classes = IsOwnerOrReadOnly
     queryset = CapacityTable.objects.all()
     
-class ReservationList(generics.ListAPIView):
-    serializer_class = ReservationSerializer
-
-    def get_queryset(self):
-        """
-        This view should return a list of all the purchases for
-        the user as determined by the username portion of the URL.
-        """
-        userId = self.kwargs['user']
-        return Reservation.objects.filter(user_id=userId)

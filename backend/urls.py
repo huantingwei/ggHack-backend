@@ -10,10 +10,10 @@ router.register(r'reservations', views.ReservationViewSet)
 router.register(r'capacityTable', views.CapacityTableViewSet)
 
 
+
 # router.register(r'create_user', views.CreateUserView)
 
 # The API urls are now determined automatically by the router.
 urlpatterns = [
     path('', include(router.urls)),
-    #url('^purchases/(?P<user>.+)/$', views.ReservationList.as_view()),
 ]
