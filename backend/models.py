@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import UserManager
 from django.db import models
 
 # Create your models here.
@@ -12,11 +11,11 @@ class User(AbstractUser):
         blank=False,
         null=False,
     )
-    username = models.CharField(max_length=50, unique=False,blank=True,null=False)
+    username = models.CharField(max_length=255, unique=False)
     # notice the absence of a "Password field", that's built in.
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username'] 
+    REQUIRED_FIELDS = [] 
 
 class Service(models.Model):
     CLINIC = 'CL' 
@@ -29,7 +28,13 @@ class Service(models.Model):
         (RESTAURANT, 'Restaurant'),
         (SHOP, 'Shop')
     )
+
     name = models.CharField(max_length=100)
+    owner = models.ForeignKey(
+        User,
+        related_name = 'ownedServices',
+        on_delete = models.CASCADE
+    )
     address = models.TextField()
     introduction = models.TextField()
     type = models.CharField(
@@ -40,7 +45,7 @@ class Service(models.Model):
     longitude = models.FloatField()
     latitude = models.FloatField()
     rating = models.FloatField()
-    image = models.URLField()
+    image = models.URLField(default='./images/default.jpg')
     # discard `reservations` field because it could be queried from Reservation
 
     # how to represent capacity and popularTimes? 
@@ -48,10 +53,12 @@ class Service(models.Model):
 class Reservation(models.Model):
     customer = models.ForeignKey(
         User,
+        related_name = 'reservations',
         on_delete = models.CASCADE
     )
-    service = models.ForeignKey(
+    provider = models.ForeignKey(
         Service,
+        related_name = 'reservations',
         on_delete = models.CASCADE
     )
     startTime = models.DateTimeField()
@@ -70,5 +77,4 @@ class Reservation(models.Model):
         choices=STATUS,
         default=PENDING
     )
-
 
