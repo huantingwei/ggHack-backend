@@ -1,11 +1,14 @@
 from django.contrib.auth.models import User
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import CreateModelMixin
+
+import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, generics, permissions, renderers, mixins, filters
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.http import Http404
 
-from rest_framework import viewsets, generics, permissions, renderers, mixins
 from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -13,8 +16,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 
 
-from backend.models import Service, Reservation
-from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer, UserSerializer
+from backend.models import Service, Reservation, CapacityTable
+from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer, CapacitySerializer
 from backend.permissions import IsOwner
 
 # Create your views here.
@@ -79,6 +82,7 @@ class ServiceProviderList(mixins.ListModelMixin, mixins.CreateModelMixin, generi
     def perform_create(self, serializer):
         serializer.save(owner=self.request.owner)
 
+        
 class ServiceProviderDetail(mixins.RetrieveModelMixin, 
                         mixins.UpdateModelMixin, 
                         mixins.DestroyModelMixin, 
@@ -119,6 +123,19 @@ class ReservationCustomerViewSet(viewsets.ModelViewSet):
         """
         customer = self.request.user
         return Reservation.objects.filter(customer=customer)
+#       filter without authentication but only query parameters
+#     queryset = Reservation.objects.all()
+#     filter_backends = (DjangoFilterBackend, )
+#     filter_fields = ('user',)
 
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)
+
+      
+class CapacityTableViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list`, `create`, `retrieve`, `update`, and `destroy` actions.
+    """
+    serializer_class = CapacitySerializer
+    # permission_classes = IsOwnerOrReadOnly
+    queryset = CapacityTable.objects.all()

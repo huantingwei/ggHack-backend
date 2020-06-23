@@ -1,7 +1,7 @@
 # from django.contrib.auth.models import User
 from rest_framework import serializers
+from backend.models import User, Service, Reservation, CapacityTable
 
-from backend.models import User, Service, Reservation
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -26,3 +26,10 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = ['id', 'provider', 'startTime', 'endTime']
+
+        
+class CapacitySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CapacityTable
+        fields = '__all__'
