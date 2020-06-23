@@ -5,15 +5,14 @@ from backend import views
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
-router.register(r'services', views.ServiceViewSet)
-router.register(r'reservations', views.ReservationViewSet)
 router.register(r'capacityTable', views.CapacityTableViewSet)
-
-
-
-# router.register(r'create_user', views.CreateUserView)
+router.register(r'customer/reservations', views.ReservationCustomerViewSet, basename='ReservationCustomerViewSet')
 
 # The API urls are now determined automatically by the router.
 urlpatterns = [
     path('', include(router.urls)),
+    path('customer/services', views.ServiceCustomerList.as_view()),
+    path('customer/services/<int:pk>', views.ServiceCustomerDetail.as_view()),
+    path('provider/services', views.ServiceProviderList.as_view()),
+    path('provider/services/<int:pk>', views.ServiceProviderDetail.as_view()),
 ]

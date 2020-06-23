@@ -1,34 +1,33 @@
 # from django.contrib.auth.models import User
 from rest_framework import serializers
-
 from backend.models import User, Service, Reservation, CapacityTable
 
+
 class UserSerializer(serializers.ModelSerializer):
-    
+
+    reservations = serializers.PrimaryKeyRelatedField(many=True, queryset=Reservation.objects.all())
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
-
-    # def create(self, validated_data):
-    #     user = User(**validated_data)
-    #     # Hash the user's password.
-    #     user.set_password(validated_data['password'])
-    #     user.save()
-    #     return user
+        fields = ['id', 'username', 'email', 'reservations']
 
 
-class ServiceSerializer(serializers.HyperlinkedModelSerializer):
+class ServiceSerializer(serializers.ModelSerializer):
     
+    owner = serializers.ReadOnlyField(source='owner.email')
+
     class Meta:
         model = Service
-        fields = ['url', 'id', 'name', 'address', 'introduction']
+        fields = ['id', 'owner', 'name', 'address', 'introduction', 'type', 'longitude', 'latitude', 'rating', 'image']
+
 
 class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ['url', 'id', 'user', 'service', 'startTime', 'endTime']
+        fields = ['id', 'provider', 'startTime', 'endTime']
 
+        
 class CapacitySerializer(serializers.ModelSerializer):
 
     class Meta:

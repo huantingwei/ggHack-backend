@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import UserManager
 from django.db import models
 from django_mysql.models import ListCharField
 
@@ -13,13 +12,13 @@ class User(AbstractUser):
         blank=False,
         null=False,
     )
+
     username = models.CharField(max_length=50, unique=True,blank=False,null=False)
     # notice the absence of a "Password field", that's built in.
-
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [] 
-
-    def __str__(self):
+ 
+  def __str__(self):
         return self.username
 
 
@@ -34,7 +33,13 @@ class Service(models.Model):
         (RESTAURANT, 'Restaurant'),
         (SHOP, 'Shop')
     )
+
     name = models.CharField(max_length=100)
+    owner = models.ForeignKey(
+        User,
+        related_name = 'ownedServices',
+        on_delete = models.CASCADE
+    )
     address = models.TextField()
     introduction = models.TextField()
     type = models.CharField(
@@ -52,14 +57,17 @@ class Service(models.Model):
 
     def __str__(self):
         return self.name
+      
 
 class Reservation(models.Model):
-    user = models.ForeignKey(
+    customer = models.ForeignKey(
         User,
+        related_name = 'reservations',
         on_delete = models.CASCADE
     )
-    service = models.ForeignKey(
+    provider = models.ForeignKey(
         Service,
+        related_name = 'reservations',
         on_delete = models.CASCADE
     )
     startTime = models.DateTimeField()
@@ -80,7 +88,7 @@ class Reservation(models.Model):
     )
 
     def __str__(self):
-        return self.user.username + ' ' + self.service.name
+        return self.user.email + ' ' + self.service.name
 
 class CapacityTable(models.Model):
     service = models.ForeignKey(
