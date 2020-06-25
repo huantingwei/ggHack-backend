@@ -139,3 +139,4 @@ class CapacityTableViewSet(viewsets.ModelViewSet):
     serializer_class = CapacitySerializer
     # permission_classes = IsOwnerOrReadOnly
     queryset = CapacityTable.objects.all()
+    

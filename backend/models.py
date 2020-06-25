@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django_mysql.models import ListCharField
-
+#from django_mysql.models import ListCharField
+from django.contrib.postgres.fields import ArrayField
 # Create your models here.
 
 class User(AbstractUser):
@@ -18,7 +18,7 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [] 
  
-  def __str__(self):
+    def __str__(self):
         return self.username
 
 
@@ -88,7 +88,7 @@ class Reservation(models.Model):
     )
 
     def __str__(self):
-        return self.user.email + ' ' + self.service.name
+        return self.customer.email + ' ' + self.provider.name
 
 class CapacityTable(models.Model):
     service = models.ForeignKey(
@@ -96,39 +96,11 @@ class CapacityTable(models.Model):
         on_delete = models.CASCADE
     )
     # Suppose opening time: 12:00 - 20:00 
-    mon = ListCharField(
-        base_field = models.CharField(max_length=5),
-        size=8,
-        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
-    )
-    tue = ListCharField(
-        base_field = models.CharField(max_length=5),
-        size=8,
-        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
-    )
-    wed = ListCharField(
-        base_field = models.CharField(max_length=5),
-        size=8,
-        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
-    )
-    thu = ListCharField(
-        base_field = models.CharField(max_length=5),
-        size=8,
-        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
-    )
-    fri = ListCharField(
-        base_field = models.CharField(max_length=5),
-        size=8,
-        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
-    )
-    sat = ListCharField(
-        base_field = models.CharField(max_length=5),
-        size=8,
-        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
-    )
-    sun = ListCharField(
-        base_field = models.CharField(max_length=5),
-        size=8,
-        max_length=(8 * 6)  # 6 * 10 character nominals, plus commas
-    )
+    mon = ArrayField(models.IntegerField())
+    tue = ArrayField(models.IntegerField())
+    wed = ArrayField(models.IntegerField())
+    thu = ArrayField(models.IntegerField())
+    fri = ArrayField(models.IntegerField())
+    sat = ArrayField(models.IntegerField())
+    sun = ArrayField(models.IntegerField())
 
