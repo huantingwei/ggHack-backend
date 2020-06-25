@@ -15,8 +15,8 @@ class User(AbstractUser):
 
     username = models.CharField(max_length=50, unique=True,blank=False,null=False)
     # notice the absence of a "Password field", that's built in.
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = [] 
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email'] 
  
     def __str__(self):
         return self.username
