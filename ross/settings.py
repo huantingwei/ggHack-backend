@@ -87,13 +87,22 @@ DATABASES = {
     #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     #}
 
+    #'default':{
+    #    'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+    #    'NAME': 'ggHack',                       # Or path to database file if using sqlite3.
+    #    'USER': 'root',                       # Not used with sqlite3.
+    #    'PASSWORD': 'ggHack2020',               # Not used with sqlite3.
+    #    'HOST': "127.0.0.1",                           # Set to empty string for localhost. Not used with sqlite3.
+    #    'PORT': '3306',                           # Set to empty string for default. Not used with sqlite3.
+    #}
+
     'default':{
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'ggHack',                       # Or path to database file if using sqlite3.
-        'USER': 'root',                       # Not used with sqlite3.
-        'PASSWORD': 'ggHack2020',               # Not used with sqlite3.
-        'HOST': "127.0.0.1",                           # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '3306',                           # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'gghack_backend_db',                       # Or path to database file if using sqlite3.
+        'USER': 'yihanliao',                       # Not used with sqlite3.
+        'PASSWORD': '',               # Not used with sqlite3.
+        'HOST': "",                           # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '5432',                           # Set to empty string for default. Not used with sqlite3.
     }
 }
 
