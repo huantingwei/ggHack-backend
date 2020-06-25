@@ -1,1 +1,1 @@
-web: gunicorn ross.wsgi --log-file -
+web: gunicorn ross.wsgi --log-file
