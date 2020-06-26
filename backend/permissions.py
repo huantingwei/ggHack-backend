@@ -12,3 +12,15 @@ class IsOwner(permissions.BasePermission):
             return obj.customer == request.user      
         
         return owner == request.user
+
+class IsCustomer(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # all methods should be protected
+
+        return obj.customer == request.user
+
+
+class IsProvider(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # all methods should be protected
+        return obj.provider == request.user

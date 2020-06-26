@@ -2,9 +2,9 @@ from django.contrib.auth.models import User
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import CreateModelMixin
 
-import django_filters
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics, permissions, renderers, mixins, filters
+# import django_filters
+# from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, generics, permissions, renderers, mixins
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.http import Http404
@@ -18,7 +18,7 @@ from rest_framework.permissions import AllowAny
 
 from backend.models import Service, Reservation, CapacityTable
 from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer, CapacitySerializer
-from backend.permissions import IsOwner
+from backend.permissions import IsOwner, IsProvider, IsCustomer
 
 # Create your views here.
 
@@ -130,6 +130,47 @@ class ReservationCustomerViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user)
+
+class ReservationProviderList(mixins.ListModelMixin, generics.GenericAPIView):
+    serializer_class = ReservationSerializer
+    permission_classes = [IsProvider]
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the reservations
+        for the currently authenticated user.
+        """
+        provider = self.request.user
+        return Reservation.objects.filter(provider=provider)
+    
+    @action(methods=['get'], detail=True)
+    def get(self, request):
+        queryset = self.get_queryset()
+        serializer = ServiceSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class ReservationProviderDetail(mixins.RetrieveModelMixin, 
+                        mixins.UpdateModelMixin, 
+                        generics.GenericAPIView):
+    serializer_class = ReservationSerializer
+    permission_classes = [IsProvider]
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the reservations
+        for the currently authenticated user.
+        """
+        provider = self.request.user
+        return Reservation.objects.filter(provider=provider)
+    
+    @action(methods=['get'], detail=True)
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+    
+    @action(methods=['put'], detail=True)
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
       
 class CapacityTableViewSet(viewsets.ModelViewSet):

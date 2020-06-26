@@ -15,4 +15,6 @@ urlpatterns = [
     path('customer/services/<int:pk>', views.ServiceCustomerDetail.as_view()),
     path('provider/services', views.ServiceProviderList.as_view()),
     path('provider/services/<int:pk>', views.ServiceProviderDetail.as_view()),
+    path('provider/reservations', views.ReservationProviderList.as_view()),
+    path('provider/reservations/<int:pk>', views.ReservationProviderDetail.as_view()),
 ]
