@@ -24,8 +24,10 @@ python manage.py runserver
 - https://postgresapp.com/downloads.html
 
 2. Create local PostgreSQL database
-Open Postgres.app, click Start button to run the database server. 
-Then click postgres database, and it will show you a terminal window:
+   - Open Postgres.app, click Start button to run the database server. 
+   - Then click postgres database, and it will show you a terminal window:
+  
+![image] backend/images/postgre_app.png
 
 ```
 $ psql
@@ -35,17 +37,17 @@ Type "help" for help.
 postgres=#
 ```
 
-Create a database:
+    Create a database:
 ```
 postgres=# CREATE DATABASE _name_;
 ```
 
-3. Installing PostgreSQL package for Python in your project virtual env
+1. Installing PostgreSQL package for Python in your project virtual env
 ```
 pip install psycopg2
 ```
 4. Updating Django Project setting 
-in ross.settings.py file:
+in ross/settings.py file:
 ```
     DATABASES = {
         'default':{
