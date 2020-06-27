@@ -35,7 +35,7 @@ class Service(models.Model):
     )
 
     name = models.CharField(max_length=100)
-    owner = models.OneToOneField(
+    owner = models.ForeignKey(
         User,
         related_name = 'owned_by',
         on_delete = models.CASCADE

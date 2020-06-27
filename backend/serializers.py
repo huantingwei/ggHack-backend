@@ -1,5 +1,6 @@
 # from django.contrib.auth.models import User
 from rest_framework import serializers
+from django.forms.models import model_to_dict
 from backend.models import User, Service, Reservation, CapacityTable
 
 
@@ -18,7 +19,6 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = ['id', 'owner', 'name', 'address', 'introduction', 'type', 'longitude', 'latitude', 'rating', 'image', 'maxCapacity']
 
-from django.forms.models import model_to_dict
 
 class ReservationSerializer(serializers.ModelSerializer):
 
