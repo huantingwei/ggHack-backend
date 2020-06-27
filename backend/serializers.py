@@ -5,29 +5,38 @@ from backend.models import User, Service, Reservation, CapacityTable
 
 class UserSerializer(serializers.ModelSerializer):
 
-    reservations = serializers.PrimaryKeyRelatedField(many=True, queryset=Reservation.objects.all())
-
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'reservations']
+        fields = ['id', 'username', 'email']
 
 
 class ServiceSerializer(serializers.ModelSerializer):
     
-    owner = serializers.ReadOnlyField(source='owner.email')
+    owner = serializers.StringRelatedField()
 
     class Meta:
         model = Service
-        fields = ['id', 'owner', 'name', 'address', 'introduction', 'type', 'longitude', 'latitude', 'rating', 'image']
+        fields = ['id', 'owner', 'name', 'address', 'introduction', 'type', 'longitude', 'latitude', 'rating', 'image', 'maxCapacity']
 
+from django.forms.models import model_to_dict
 
 class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ['id', 'provider', 'startTime', 'endTime']
+        fields = ['id', 'customer', 'service', 'serviceOwner', 'startTime', 'endTime', 'status']
 
-        
+    def to_representation(self, instance):
+        return {
+            'id': instance.id, 
+            'customer': instance.customer.username, 
+            'service': model_to_dict(Service.objects.get(name=instance.service.name)),
+            'serviceOwner': instance.serviceOwner.username, 
+            'startTime': instance.startTime,
+            'endTime': instance.endTime, 
+            'status': instance.status
+        }
+
 class CapacitySerializer(serializers.ModelSerializer):
 
     class Meta:

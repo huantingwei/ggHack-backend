@@ -4,7 +4,7 @@ from rest_framework.mixins import CreateModelMixin
 
 # import django_filters
 # from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics, permissions, renderers, mixins
+from rest_framework import viewsets, generics, permissions, renderers, mixins, status
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.http import Http404
@@ -105,16 +105,18 @@ class ServiceProviderDetail(mixins.RetrieveModelMixin,
     
     @action(methods=['put'], detail=True)
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        return self.partial_update(request, *args, **kwargs)
 
 
-class ReservationCustomerViewSet(viewsets.ModelViewSet):
+class ReservationCustomerList(mixins.ListModelMixin, 
+                            mixins.CreateModelMixin, 
+                            generics.GenericAPIView):
     """
-    `list`, `create`, `retrieve`, `update`, and `destroy` actions for reservation management
+    `list`, `create`, actions for reservation management of customer
     Only the 'reserver' of the reservation is permitted
     """
     serializer_class = ReservationSerializer
-    permission_classes = [IsOwner]
+    permission_classes = [IsCustomer]
 
     def get_queryset(self):
         """
@@ -123,13 +125,70 @@ class ReservationCustomerViewSet(viewsets.ModelViewSet):
         """
         customer = self.request.user
         return Reservation.objects.filter(customer=customer)
-#       filter without authentication but only query parameters
-#     queryset = Reservation.objects.all()
-#     filter_backends = (DjangoFilterBackend, )
-#     filter_fields = ('user',)
 
-    def perform_create(self, serializer):
-        serializer.save(customer=self.request.user)
+    @action(methods=['get'], detail=True)
+    def get(self, request):
+        queryset = self.get_queryset()
+        serializer = ReservationSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['post'], detail=True)
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+    def create(self, request, *args, **kwargs):
+        data = self._preprocess(request)
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def _preprocess(self, request):
+        data = request.data.dict()
+        service_name = data['service']
+        data['customer'] = request.user.id
+        service = Service.objects.get(name=service_name)
+        data['serviceOwner'] = service.owner.id
+        data['service'] = service.id
+        
+        return data
+
+
+class ReservationCustomerDetail(mixins.RetrieveModelMixin, 
+                        mixins.UpdateModelMixin, 
+                        mixins.DestroyModelMixin, 
+                        generics.GenericAPIView):
+    """
+    `retrieve`, `update`, `destroy` actions for service owner(provider) to configure the services
+    """
+    permission_classes = [IsCustomer]
+    serializer_class = ReservationSerializer
+    queryset = Reservation.objects.all()
+    
+    def get_queryset(self):
+        """
+        This view should return a list of all the reservations
+        for the currently authenticated user.
+        """
+        customer = self.request.user
+        return Reservation.objects.filter(customer=customer)
+        
+    @action(methods=['get'], detail=True)
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @action(methods=['delete'], detail=True)
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+    
+    @action(methods=['put'], detail=True)
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
 
 class ReservationProviderList(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = ReservationSerializer
@@ -140,8 +199,8 @@ class ReservationProviderList(mixins.ListModelMixin, generics.GenericAPIView):
         This view should return a list of all the reservations
         for the currently authenticated user.
         """
-        provider = self.request.user.id
-        return Reservation.objects.filter(provider=provider)
+        serviceOwner = self.request.user
+        return Reservation.objects.filter(serviceOwner=serviceOwner)
     
     @action(methods=['get'], detail=True)
     def get(self, request):
@@ -157,8 +216,9 @@ class ReservationProviderDetail(mixins.RetrieveModelMixin,
     permission_classes = [IsProvider]
 
     def get_queryset(self):
-        provider = self.request.user.id
-        return Reservation.objects.filter(provider=provider)
+        serviceOwner = self.request.user
+        return Reservation.objects.filter(serviceOwner=serviceOwner)
+    
     
     @action(methods=['get'], detail=True)
     def get(self, request, *args, **kwargs):

@@ -35,9 +35,9 @@ class Service(models.Model):
     )
 
     name = models.CharField(max_length=100)
-    owner = models.ForeignKey(
+    owner = models.OneToOneField(
         User,
-        related_name = 'ownedServices',
+        related_name = 'owned_by',
         on_delete = models.CASCADE
     )
     address = models.TextField()
@@ -56,18 +56,35 @@ class Service(models.Model):
     maxCapacity = models.IntegerField(default=10)
 
     def __str__(self):
-        return self.name
+        service = {
+            'name': self.name,
+            'owner': self.owner,
+            'address': self.address,
+            'introduction': self.introduction,
+            'type': self.type,
+            'longitude': self.longitude,
+            'latitude': self.latitude,
+            'rating': self.rating,
+            'image': self.image,
+            'maxCapacity': self.maxCapacity
+        }
+        return str(service)
       
 
 class Reservation(models.Model):
     customer = models.ForeignKey(
         User,
-        related_name = 'reservations',
+        related_name = 'reserved_by',
         on_delete = models.CASCADE
     )
-    provider = models.ForeignKey(
+    service = models.ForeignKey(
         Service,
-        related_name = 'reservations',
+        related_name = 'of_service',
+        on_delete = models.CASCADE
+    )
+    serviceOwner = models.ForeignKey(
+        User,
+        related_name = 'of_service_owned_by',
         on_delete = models.CASCADE
     )
     startTime = models.DateTimeField()
@@ -88,7 +105,7 @@ class Reservation(models.Model):
     )
 
     def __str__(self):
-        return self.customer.email + ' ' + self.provider.name
+        return self.customer.username + ' : ' + self.service.name + ' : ' + self.serviceOwner.username
 
 class CapacityTable(models.Model):
     service = models.ForeignKey(
