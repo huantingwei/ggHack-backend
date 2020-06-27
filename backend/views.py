@@ -80,7 +80,7 @@ class ServiceProviderList(mixins.ListModelMixin, mixins.CreateModelMixin, generi
         return self.create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.owner)
+        serializer.save(owner=self.request.user)
 
         
 class ServiceProviderDetail(mixins.RetrieveModelMixin, 
@@ -140,13 +140,13 @@ class ReservationProviderList(mixins.ListModelMixin, generics.GenericAPIView):
         This view should return a list of all the reservations
         for the currently authenticated user.
         """
-        provider = self.request.user
+        provider = self.request.user.id
         return Reservation.objects.filter(provider=provider)
     
     @action(methods=['get'], detail=True)
     def get(self, request):
         queryset = self.get_queryset()
-        serializer = ServiceSerializer(queryset, many=True)
+        serializer = ReservationSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -157,11 +157,7 @@ class ReservationProviderDetail(mixins.RetrieveModelMixin,
     permission_classes = [IsProvider]
 
     def get_queryset(self):
-        """
-        This view should return a list of all the reservations
-        for the currently authenticated user.
-        """
-        provider = self.request.user
+        provider = self.request.user.id
         return Reservation.objects.filter(provider=provider)
     
     @action(methods=['get'], detail=True)

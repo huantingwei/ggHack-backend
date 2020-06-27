@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'django_filters',
+    # 'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -155,12 +155,12 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend',]
+    # 'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend',]
 }
 
 # required by rest_auth/all-auth
 SITE_ID = 1
 AUTH_USER_MODEL = 'backend.User'
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'email'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
 ACCOUNT_EMAIL_VERIFICATION = "none"   # none: no need for email verification for registration
 ACCOUNT_EMAIL_REQUIRED = (True)       # True: need email for registration

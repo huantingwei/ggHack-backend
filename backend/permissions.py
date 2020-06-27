@@ -23,4 +23,4 @@ class IsCustomer(permissions.BasePermission):
 class IsProvider(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # all methods should be protected
-        return obj.provider == request.user
+        return obj.provider == request.user.id
