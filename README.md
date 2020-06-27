@@ -27,7 +27,7 @@ python manage.py runserver
    - Open Postgres.app, click Start button to run the database server. 
    - Then click postgres database, and it will show you a terminal window:
   
-![image] (backend/images/postgre_app.png)
+    ![image] (https://github.com/huantingwei/ggHack-backend/blob/master/backend/images/postgre_app.png)
 
 ```
 $ psql
