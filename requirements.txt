@@ -29,7 +29,7 @@ npm==0.1.1
 oauthlib==3.1.0
 optional-django==0.1.0
 pipenv==2020.6.2
-populartimes==2.0
+# populartimes==2.0
 psycopg2==2.8.5
 pycparser==2.20
 Pygments==2.6.1
