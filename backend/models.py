@@ -87,8 +87,11 @@ class Reservation(models.Model):
         related_name = 'of_service_owned_by',
         on_delete = models.CASCADE
     )
-    startTime = models.DateTimeField()
-    endTime = models.DateTimeField()
+    #startTime = models.DateTimeField()
+    #endTime = models.DateTimeField()
+    bookDate = models.DateField()
+    bookTime = models.TimeField()
+    numPeople = models.IntegerField()
 
     COMPLETED = 'CP'
     PENDING = 'PD'
@@ -112,12 +115,5 @@ class CapacityTable(models.Model):
         Service,
         on_delete = models.CASCADE
     )
-    # Suppose opening time: 12:00 - 20:00 
-    mon = ArrayField(models.IntegerField())
-    tue = ArrayField(models.IntegerField())
-    wed = ArrayField(models.IntegerField())
-    thu = ArrayField(models.IntegerField())
-    fri = ArrayField(models.IntegerField())
-    sat = ArrayField(models.IntegerField())
-    sun = ArrayField(models.IntegerField())
+    capacityTimeTable = ArrayField(ArrayField(models.IntegerField()), size=7)
 
