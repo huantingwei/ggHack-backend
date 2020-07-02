@@ -5,7 +5,7 @@ from backend import views
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
-router.register(r'capacityTable', views.CapacityTableViewSet)
+#router.register(r'capacityTable', views.CapacityTableViewSet)
 
 # The API urls are now determined automatically by the router.
 urlpatterns = [

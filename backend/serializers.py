@@ -1,7 +1,7 @@
 # from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.forms.models import model_to_dict
-from backend.models import User, Service, Reservation, CapacityTable
+from backend.models import User, Service, Reservation 
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,8 +40,8 @@ class ReservationSerializer(serializers.ModelSerializer):
             'status': instance.status
         }
 
-class CapacitySerializer(serializers.ModelSerializer):
+#class CapacitySerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = CapacityTable
-        fields = '__all__'
+#    class Meta:
+#        model = CapacityTable
+#        fields = '__all__'

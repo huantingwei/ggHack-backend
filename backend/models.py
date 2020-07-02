@@ -2,6 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 #from django_mysql.models import ListCharField
 from django.contrib.postgres.fields import ArrayField
+from django.db.models import F
+from django.db.models.signals import post_save, pre_save, post_delete
+from django.dispatch import receiver
 # Create your models here.
 
 class User(AbstractUser):
@@ -51,9 +54,14 @@ class Service(models.Model):
     latitude = models.FloatField()
     rating = models.FloatField()
     image = models.URLField()
+    
+    startTime = models.IntegerField() # TimeField()
+    closeTime = models.IntegerField() # TimeField()
 
     # how to represent capacity and popularTimes? 
     maxCapacity = models.IntegerField(default=10)
+
+    freeSlots = ArrayField(ArrayField(models.IntegerField()))
 
     def __str__(self):
         service = {
@@ -69,6 +77,21 @@ class Service(models.Model):
             'maxCapacity': self.maxCapacity
         }
         return str(service)
+
+@receiver(post_save, sender = Service, dispatch_uid='init freeslots')
+def init_freeslots(sender, instance,created, **kwargs):
+    if created:
+        openningHours = instance.closeTime - instance.startTime
+        mon = [instance.maxCapacity for i in range(openningHours)]
+        tue = [instance.maxCapacity for i in range(openningHours)]
+        wed = [instance.maxCapacity for i in range(openningHours)]
+        thu = [instance.maxCapacity for i in range(openningHours)]
+        fri = [instance.maxCapacity for i in range(openningHours)]
+        sat = [instance.maxCapacity for i in range(openningHours)]
+        sun = [instance.maxCapacity for i in range(openningHours)]
+        instance.freeSlots = [mon, tue, wed, thu, fri, sat, sun]
+        instance.save()
+post_save.connect(init_freeslots, sender=Service)
       
 
 class Reservation(models.Model):
@@ -79,7 +102,6 @@ class Reservation(models.Model):
     )
     service = models.ForeignKey(
         Service,
-        related_name = 'of_service',
         on_delete = models.CASCADE
     )
     serviceOwner = models.ForeignKey(
@@ -89,8 +111,21 @@ class Reservation(models.Model):
     )
     #startTime = models.DateTimeField()
     #endTime = models.DateTimeField()
-    bookDate = models.DateField()
-    bookTime = models.TimeField()
+    WEEK_DAYS = (
+        ('0', 'Monday'),
+        ('1', 'Tuesday'),
+        ('2', 'Wednesday'),
+        ('3', 'Thursday'),
+        ('4', 'Friday'),
+        ('5', 'Saturday'),
+        ('6', 'Sunday')
+    )
+    bookDate = models.CharField(
+        max_length=100,
+        choices=WEEK_DAYS,
+        default='Monday'
+    )
+    bookTime = models.IntegerField()
     numPeople = models.IntegerField()
 
     COMPLETED = 'CP'
@@ -110,10 +145,18 @@ class Reservation(models.Model):
     def __str__(self):
         return self.customer.username + ' : ' + self.service.name + ' : ' + self.serviceOwner.username
 
-class CapacityTable(models.Model):
-    service = models.ForeignKey(
-        Service,
-        on_delete = models.CASCADE
-    )
-    capacityTimeTable = ArrayField(ArrayField(models.IntegerField()), size=7)
+@receiver(post_save, sender = Reservation, dispatch_uid='update freeslots')
+def update_freeslots(sender, instance, created, **kwargs):
+    if instance and created:
+        date = int(instance.bookDate)
+        time = instance.bookTime - instance.service.startTime - 1
+        instance.service.freeSlots[date][time] -= instance.numPeople
+        instance.service.save()
+      
 
+@receiver(post_delete, sender=Reservation)
+def delete_reservation(sender, instance, *args, **kwargs):
+    date = int(instance.bookDate)
+    time = instance.bookTime - instance.service.startTime - 1
+    instance.service.freeSlots[date][time] += instance.numPeople
+    instance.service.save()

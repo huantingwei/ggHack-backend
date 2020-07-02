@@ -16,8 +16,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 
 
-from backend.models import Service, Reservation, CapacityTable
-from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer, CapacitySerializer
+from backend.models import Service, Reservation
+from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer #, CapacitySerializer
 from backend.permissions import IsOwner, IsProvider, IsCustomer
 
 # Create your views here.
@@ -229,11 +229,13 @@ class ReservationProviderDetail(mixins.RetrieveModelMixin,
         return self.partial_update(request, *args, **kwargs)
 
       
-class CapacityTableViewSet(viewsets.ModelViewSet):
-    """
-    This viewset automatically provides `list`, `create`, `retrieve`, `update`, and `destroy` actions.
-    """
-    serializer_class = CapacitySerializer
-    # permission_classes = IsOwnerOrReadOnly
-    queryset = CapacityTable.objects.all()
+#class CapacityTableViewSet(viewsets.ModelViewSet):
+#    """
+#    This viewset automatically provides `list`, `create`, `retrieve`, `update`, and `destroy` actions.
+#    """
+#    serializer_class = CapacitySerializer
+#    # permission_classes = IsOwnerOrReadOnly
+#    queryset = CapacityTable.objects.all()
+
+
     
