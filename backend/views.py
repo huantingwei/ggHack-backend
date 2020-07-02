@@ -16,8 +16,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 
 
-from backend.models import Service, Reservation, FreeSlot
-from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer, FreeSlotSerializer
+from backend.models import Service, Reservation
+from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer
 from backend.permissions import IsOwner, IsProvider, IsCustomer
 
 import populartimes

@@ -1,7 +1,8 @@
 # from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.forms.models import model_to_dict
-from backend.models import User, Service, Reservation, FreeSlot, PopularTimes
+
+from backend.models import User, Service, Reservation,  PopularTimes
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -39,7 +40,7 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ['id', 'customer', 'service', 'serviceOwner', 'startTime', 'endTime', 'status']
+        fields = ['id', 'customer', 'service', 'serviceOwner', 'bookDate','bookTime', 'numPeople',  'status']
 
     def validate(self, data):
         """
@@ -55,13 +56,10 @@ class ReservationSerializer(serializers.ModelSerializer):
             'customer': instance.customer.username, 
             'service': model_to_dict(Service.objects.get(name=instance.service.name)),
             'serviceOwner': instance.serviceOwner.username, 
-            'startTime': instance.startTime,
-            'endTime': instance.endTime, 
+            #'startTime': instance.startTime,
+            #'endTime': instance.endTime, 
+            'bookDate': instance.bookDate,
+            'bookTime': instance.bookTime,
+            'numPeople': instance.numPeople,
             'status': instance.status
         }
-
-class FreeSlotSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = FreeSlot
-        fields = '__all__'

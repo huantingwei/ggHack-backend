@@ -1,8 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-
-from django.db.models.signals import pre_save
+from django.db.models import F
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 
 import populartimes
@@ -83,17 +83,10 @@ class Service(models.Model):
     rating = models.FloatField(blank=True, null=True)
     image = models.URLField(blank=True, null=True)
     maxCapacity = models.IntegerField(default=10) 
-    placeId = models.TextField()
+    startTime = models.IntegerField() # TimeField()
+    closeTime = models.IntegerField() # TimeField()
 
-    # TODO: Django - automatically create a model instance when another model instance is created
-    # https://docs.djangoproject.com/en/2.1/topics/signals/
-    freeSlot = models.OneToOneField(
-        FreeSlot, 
-        related_name = 'current_capacity', 
-        on_delete = models.PROTECT, # Forbid the deletion of the referenced object(FreeSlot)
-        blank=True,
-        null=True,
-    )
+    placeId = models.TextField()
     popularTimes = models.OneToOneField(
         PopularTimes, 
         related_name = 'historical_popular_times', 
@@ -102,6 +95,8 @@ class Service(models.Model):
         null=True,
     )
     
+    freeSlots = ArrayField(ArrayField(models.IntegerField()))
+
 
     def __str__(self):
         service = {
@@ -119,6 +114,21 @@ class Service(models.Model):
             'capacityTable': self.capacityTable
         }
         return str(service)
+
+@receiver(post_save, sender = Service, dispatch_uid='init freeslots')
+def init_freeslots(sender, instance,created, **kwargs):
+    if created:
+        openningHours = instance.closeTime - instance.startTime
+        mon = [instance.maxCapacity for i in range(openningHours)]
+        tue = [instance.maxCapacity for i in range(openningHours)]
+        wed = [instance.maxCapacity for i in range(openningHours)]
+        thu = [instance.maxCapacity for i in range(openningHours)]
+        fri = [instance.maxCapacity for i in range(openningHours)]
+        sat = [instance.maxCapacity for i in range(openningHours)]
+        sun = [instance.maxCapacity for i in range(openningHours)]
+        instance.freeSlots = [mon, tue, wed, thu, fri, sat, sun]
+        instance.save()
+post_save.connect(init_freeslots, sender=Service)
       
 
 def get_popular_times(place_id):
@@ -154,7 +164,6 @@ class Reservation(models.Model):
     )
     service = models.ForeignKey(
         Service,
-        related_name = 'of_service',
         on_delete = models.CASCADE
     )
     serviceOwner = models.ForeignKey(
@@ -162,8 +171,24 @@ class Reservation(models.Model):
         related_name = 'of_service_owned_by',
         on_delete = models.CASCADE
     )
-    startTime = models.DateTimeField()
-    endTime = models.DateTimeField()
+    #startTime = models.DateTimeField()
+    #endTime = models.DateTimeField()
+    WEEK_DAYS = (
+        ('0', 'Monday'),
+        ('1', 'Tuesday'),
+        ('2', 'Wednesday'),
+        ('3', 'Thursday'),
+        ('4', 'Friday'),
+        ('5', 'Saturday'),
+        ('6', 'Sunday')
+    )
+    bookDate = models.CharField(
+        max_length=100,
+        choices=WEEK_DAYS,
+        default='Monday'
+    )
+    bookTime = models.IntegerField()
+    numPeople = models.IntegerField()
 
     COMPLETED = 'CP'
     PENDING = 'PD'
@@ -181,4 +206,21 @@ class Reservation(models.Model):
 
     def __str__(self):
         return self.customer.username + ' : ' + self.service.name + ' : ' + self.serviceOwner.username
+
+
+@receiver(post_save, sender = Reservation, dispatch_uid='update freeslots')
+def update_freeslots(sender, instance, created, **kwargs):
+    if instance and created:
+        date = int(instance.bookDate)
+        time = instance.bookTime - instance.service.startTime - 1
+        instance.service.freeSlots[date][time] -= instance.numPeople
+        instance.service.save()
+      
+
+@receiver(post_delete, sender=Reservation)
+def delete_reservation(sender, instance, *args, **kwargs):
+    date = int(instance.bookDate)
+    time = instance.bookTime - instance.service.startTime - 1
+    instance.service.freeSlots[date][time] += instance.numPeople
+    instance.service.save()
 
