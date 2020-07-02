@@ -17,9 +17,11 @@ from rest_framework.permissions import AllowAny
 
 
 from backend.models import Service, Reservation
-from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer #, CapacitySerializer
+from backend.serializers import UserSerializer, ServiceSerializer, ReservationSerializer
 from backend.permissions import IsOwner, IsProvider, IsCustomer
 
+import populartimes
+API_KEY = 'AIzaSyAH-8I6T-mFTW_e_26ISDs8ChnVCSvKQRs'
 # Create your views here.
 
 class ServiceCustomerList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
@@ -61,7 +63,7 @@ class ServiceCustomerDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
 class ServiceProviderList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     """
     `list`, `create` actions for viewing and creating services.
-    Currently allowing any user to create a service(be a service provider)
+    Currently allowing any authenticated user to create a service(to become a service provider)
     """
     serializer_class = ServiceSerializer
 
@@ -81,8 +83,8 @@ class ServiceProviderList(mixins.ListModelMixin, mixins.CreateModelMixin, generi
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-
         
+
 class ServiceProviderDetail(mixins.RetrieveModelMixin, 
                         mixins.UpdateModelMixin, 
                         mixins.DestroyModelMixin, 
@@ -136,6 +138,9 @@ class ReservationCustomerList(mixins.ListModelMixin,
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
+    # TODO: need to 
+    # (1) check availability (> maxCapacity?)
+    # (2) update capacity table
 
     def create(self, request, *args, **kwargs):
         data = self._preprocess(request)
@@ -227,15 +232,4 @@ class ReservationProviderDetail(mixins.RetrieveModelMixin,
     @action(methods=['put'], detail=True)
     def put(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
-
-      
-#class CapacityTableViewSet(viewsets.ModelViewSet):
-#    """
-#    This viewset automatically provides `list`, `create`, `retrieve`, `update`, and `destroy` actions.
-#    """
-#    serializer_class = CapacitySerializer
-#    # permission_classes = IsOwnerOrReadOnly
-#    queryset = CapacityTable.objects.all()
-
-
     

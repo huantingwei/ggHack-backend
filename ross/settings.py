@@ -101,8 +101,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'gghackBackendDB',                       # Or path to database file if using sqlite3.
         'USER': 'yihanliao',                       # Not used with sqlite3.
-        # 'USER': 'postgres',    
         'PASSWORD': '',               # Not used with sqlite3.
+        # 'USER': 'postgres',    
+        # 'PASSWORD': 'toor',
         'HOST': "",                           # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                           # Set to empty string for default. Not used with sqlite3.
     }
