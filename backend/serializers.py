@@ -1,7 +1,7 @@
 # from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.forms.models import model_to_dict
-from backend.models import User, Service, Reservation, CapacityTable
+from backend.models import User, Service, Reservation, FreeSlot, PopularTimes
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,14 +17,37 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Service
-        fields = ['id', 'owner', 'name', 'address', 'introduction', 'type', 'longitude', 'latitude', 'rating', 'image', 'maxCapacity']
+        fields = ['id', 'owner', 'name', 'address', 'introduction', 'type', 
+                'longitude', 'latitude', 'rating', 'image', 
+                'maxCapacity', 'placeId', 'freeSlot', 'popularTimes']
+    
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        print(ret)
+        return ret
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        try:
+            ret['freeSlot'] = FreeSlot.objects.get(pk=ret['freeSlot'])
+            ret['popularTimes'] = PopularTimes.objects.get(pk=ret['popularTimes'])
+        except:
+            return ret
+        return ret
 
 class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
         fields = ['id', 'customer', 'service', 'serviceOwner', 'startTime', 'endTime', 'status']
+
+    def validate(self, data):
+        """
+        Check that startTime is before endTime.
+        """
+        if data['startTime'] > data['endTime']:
+            raise serializers.ValidationError("startTime must occur before endTime")
+        return data
 
     def to_representation(self, instance):
         return {
@@ -37,8 +60,8 @@ class ReservationSerializer(serializers.ModelSerializer):
             'status': instance.status
         }
 
-class CapacitySerializer(serializers.ModelSerializer):
+class FreeSlotSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CapacityTable
+        model = FreeSlot
         fields = '__all__'
