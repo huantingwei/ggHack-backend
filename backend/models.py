@@ -27,17 +27,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-class PopularTimes(models.Model):
-    # 24 hour data obtained from Google Map API
-
-    data = ArrayField(
-        ArrayField(
-            models.IntegerField(), 
-            size=24
-        ),
-        size=7, 
-        default = list,
-    )
 
 class Service(models.Model):
     CLINIC = 'CL' 
@@ -117,32 +106,7 @@ def init_service(sender, instance, created, **kwargs):
         instance.freeSlots = init_freeslots(instance)
         instance.popularTimes = get_popular_times(instance)
         instance.save()
-    # else:
-    #     print('error in creating service')
-    #     raise AssertionError
 post_save.connect(init_service, sender=Service)
-
-
-# @receiver(post_save, sender = Service, dispatch_uid='init freeslots')
-# def init_freeslots(sender, instance, created, **kwargs):
-#     if created:
-#         openningHours = instance.closeTime - instance.startTime
-#         mon = [instance.maxCapacity for i in range(openningHours)]
-#         tue = [instance.maxCapacity for i in range(openningHours)]
-#         wed = [instance.maxCapacity for i in range(openningHours)]
-#         thu = [instance.maxCapacity for i in range(openningHours)]
-#         fri = [instance.maxCapacity for i in range(openningHours)]
-#         sat = [instance.maxCapacity for i in range(openningHours)]
-#         sun = [instance.maxCapacity for i in range(openningHours)]
-#         instance.freeSlots = [mon, tue, wed, thu, fri, sat, sun]
-#         # get_popular_times
-#         data = get_popular_times(instance.placeId)
-#         print(data)
-#         ppt = PopularTimes.objects.create(data=data)
-#         instance.popularTimes = ppt
-
-#         instance.save()
-# post_save.connect(init_freeslots, sender=Service)
 
 
 class Reservation(models.Model):
