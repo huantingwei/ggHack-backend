@@ -84,20 +84,20 @@ class ServiceProviderList(mixins.ListModelMixin, mixins.CreateModelMixin, generi
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    # TODO: 
-    # get_popular_times for PopularTimes
-    def create(self, request, *args, **kwargs):
-        data = request.data
+    # # TODO: 
+    # # get_popular_times for PopularTimes
+    # def create(self, request, *args, **kwargs):
+    #     data = request.data
 
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        # serializer.data['popularTimes'] = get_popular_times(self, serializer.data['placeId'])
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    #     serializer = self.get_serializer(data=data)
+    #     serializer.is_valid(raise_exception=True)
+    #     # serializer.data['popularTimes'] = get_popular_times(self, serializer.data['placeId'])
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def get_popular_times(self, place_id):
-        popular_times = populartimes.get_id(API_KEY, place_id)
+    # def get_popular_times(self, place_id):
+    #     popular_times = populartimes.get_id(API_KEY, place_id)
         
 
 class ServiceProviderDetail(mixins.RetrieveModelMixin, 

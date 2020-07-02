@@ -27,18 +27,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-
-class FreeSlot(models.Model):
-    data = ArrayField(
-        ArrayField(
-            models.IntegerField(), 
-            size=24
-        ),
-        size=7,
-        default = list,
-    )
-
-
 class PopularTimes(models.Model):
     # 24 hour data obtained from Google Map API
 
@@ -50,8 +38,6 @@ class PopularTimes(models.Model):
         size=7, 
         default = list,
     )
-    
-
 
 class Service(models.Model):
     CLINIC = 'CL' 
@@ -87,73 +73,76 @@ class Service(models.Model):
     closeTime = models.IntegerField() # TimeField()
 
     placeId = models.TextField()
-    popularTimes = models.OneToOneField(
-        PopularTimes, 
-        related_name = 'historical_popular_times', 
-        on_delete = models.PROTECT,
-        blank=True,
-        null=True,
+    freeSlots = ArrayField(
+        ArrayField(models.IntegerField(blank=True, null=True)),
+        blank=True, null=True,
+    )
+    popularTimes = ArrayField(
+        ArrayField(models.IntegerField(blank=True, null=True)),
+        blank=True, null=True,
     )
     
-    freeSlots = ArrayField(ArrayField(models.IntegerField()))
-
-
     def __str__(self):
-        service = {
-            'name': self.name,
-            'owner': self.owner,
-            'address': self.address,
-            'introduction': self.introduction,
-            'type': self.type,
-            'longitude': self.longitude,
-            'latitude': self.latitude,
-            'rating': self.rating,
-            'image': self.image,
-            'maxCapacity': self.maxCapacity, 
-            'popularTimes': self.popularTimes,
-            'capacityTable': self.capacityTable
-        }
-        return str(service)
+        return self.name
 
-@receiver(post_save, sender = Service, dispatch_uid='init freeslots')
-def init_freeslots(sender, instance,created, **kwargs):
-    if created:
-        openningHours = instance.closeTime - instance.startTime
-        mon = [instance.maxCapacity for i in range(openningHours)]
-        tue = [instance.maxCapacity for i in range(openningHours)]
-        wed = [instance.maxCapacity for i in range(openningHours)]
-        thu = [instance.maxCapacity for i in range(openningHours)]
-        fri = [instance.maxCapacity for i in range(openningHours)]
-        sat = [instance.maxCapacity for i in range(openningHours)]
-        sun = [instance.maxCapacity for i in range(openningHours)]
-        instance.freeSlots = [mon, tue, wed, thu, fri, sat, sun]
-        instance.save()
-post_save.connect(init_freeslots, sender=Service)
-      
 
-def get_popular_times(place_id):
-    place_detail = populartimes.get_id(API_KEY, place_id)
+def init_freeslots(instance):
+    openningHours = instance.closeTime - instance.startTime
+    mon = [instance.maxCapacity for i in range(openningHours)]
+    tue = [instance.maxCapacity for i in range(openningHours)]
+    wed = [instance.maxCapacity for i in range(openningHours)]
+    thu = [instance.maxCapacity for i in range(openningHours)]
+    fri = [instance.maxCapacity for i in range(openningHours)]
+    sat = [instance.maxCapacity for i in range(openningHours)]
+    sun = [instance.maxCapacity for i in range(openningHours)]
+    return [mon, tue, wed, thu, fri, sat, sun]
+
+def get_popular_times(instance):
+    place_detail = populartimes.get_id(API_KEY, instance.placeId)
+    data = []
     if place_detail['populartimes'] is not None:
-        data = []
         popular_times = place_detail['populartimes']
-        print(popular_times)
         for d in popular_times:
             data.append(d['data'])
         
         assert len(data) == 7 and len(data[0]) == 24, 'error in get_popular_times' 
+    else:
+        raise ConnectionError('No populartimes available for this service')
+    print(data)
     return data
 
-# @receiver(pre_save, sender=Service)
-def create_populartimes(sender, instance, created, **kwargs):
+@receiver(post_save, sender = Service, dispatch_uid='init service')
+def init_service(sender, instance, created, **kwargs):
     if created:
-        data = get_popular_times(instance.placeId)
-        ppt = PopularTimes.objects.create(data=data)
-        instance.popularTimes = ppt
-    else:
-        print('error in creating service')
-        raise ModuleNotFoundError # what error???
+        instance.freeSlots = init_freeslots(instance)
+        instance.popularTimes = get_popular_times(instance)
+        instance.save()
+    # else:
+    #     print('error in creating service')
+    #     raise AssertionError
+post_save.connect(init_service, sender=Service)
 
-pre_save.connect(create_populartimes, sender=Service)
+
+# @receiver(post_save, sender = Service, dispatch_uid='init freeslots')
+# def init_freeslots(sender, instance, created, **kwargs):
+#     if created:
+#         openningHours = instance.closeTime - instance.startTime
+#         mon = [instance.maxCapacity for i in range(openningHours)]
+#         tue = [instance.maxCapacity for i in range(openningHours)]
+#         wed = [instance.maxCapacity for i in range(openningHours)]
+#         thu = [instance.maxCapacity for i in range(openningHours)]
+#         fri = [instance.maxCapacity for i in range(openningHours)]
+#         sat = [instance.maxCapacity for i in range(openningHours)]
+#         sun = [instance.maxCapacity for i in range(openningHours)]
+#         instance.freeSlots = [mon, tue, wed, thu, fri, sat, sun]
+#         # get_popular_times
+#         data = get_popular_times(instance.placeId)
+#         print(data)
+#         ppt = PopularTimes.objects.create(data=data)
+#         instance.popularTimes = ppt
+
+#         instance.save()
+# post_save.connect(init_freeslots, sender=Service)
 
 
 class Reservation(models.Model):
@@ -171,8 +160,6 @@ class Reservation(models.Model):
         related_name = 'of_service_owned_by',
         on_delete = models.CASCADE
     )
-    #startTime = models.DateTimeField()
-    #endTime = models.DateTimeField()
     WEEK_DAYS = (
         ('0', 'Monday'),
         ('1', 'Tuesday'),
@@ -205,7 +192,7 @@ class Reservation(models.Model):
     )
 
     def __str__(self):
-        return self.customer.username + ' : ' + self.service.name + ' : ' + self.serviceOwner.username
+        return self.customer.username + ' : ' + self.service.name
 
 
 @receiver(post_save, sender = Reservation, dispatch_uid='update freeslots')

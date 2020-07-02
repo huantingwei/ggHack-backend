@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from django.forms.models import model_to_dict
 
-from backend.models import User, Service, Reservation,  PopularTimes
+from backend.models import User, Service, Reservation, PopularTimes
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,8 +19,8 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = ['id', 'owner', 'name', 'address', 'introduction', 'type', 
-                'longitude', 'latitude', 'rating', 'image', 
-                'maxCapacity', 'placeId', 'freeSlot', 'popularTimes']
+                'longitude', 'latitude', 'rating', 'image', 'maxCapacity', 
+                'startTime', 'closeTime', 'placeId', 'freeSlots', 'popularTimes']
     
     def to_internal_value(self, data):
         ret = super().to_internal_value(data)
@@ -30,7 +30,6 @@ class ServiceSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         try:
-            ret['freeSlot'] = FreeSlot.objects.get(pk=ret['freeSlot'])
             ret['popularTimes'] = PopularTimes.objects.get(pk=ret['popularTimes'])
         except:
             return ret
@@ -46,8 +45,9 @@ class ReservationSerializer(serializers.ModelSerializer):
         """
         Check that startTime is before endTime.
         """
-        if data['startTime'] > data['endTime']:
-            raise serializers.ValidationError("startTime must occur before endTime")
+        # TODO: need to check if bookTime is within startTime and closeTime
+        # if data['startTime'] > data['endTime']:
+        #     raise serializers.ValidationError("startTime must occur before endTime")
         return data
 
     def to_representation(self, instance):
@@ -56,8 +56,6 @@ class ReservationSerializer(serializers.ModelSerializer):
             'customer': instance.customer.username, 
             'service': model_to_dict(Service.objects.get(name=instance.service.name)),
             'serviceOwner': instance.serviceOwner.username, 
-            #'startTime': instance.startTime,
-            #'endTime': instance.endTime, 
             'bookDate': instance.bookDate,
             'bookTime': instance.bookTime,
             'numPeople': instance.numPeople,
