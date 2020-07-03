@@ -106,7 +106,7 @@ def init_service(sender, instance, created, **kwargs):
         instance.freeSlots = init_freeslots(instance)
         instance.popularTimes = get_popular_times(instance)
         instance.save()
-post_save.connect(init_service, sender=Service)
+#post_save.connect(init_service, sender=Service)
 
 
 class Reservation(models.Model):
@@ -163,7 +163,7 @@ class Reservation(models.Model):
 def update_freeslots(sender, instance, created, **kwargs):
     if instance and created:
         date = int(instance.bookDate)
-        time = instance.bookTime - instance.service.startTime - 1
+        time = instance.bookTime - instance.service.startTime
         instance.service.freeSlots[date][time] -= instance.numPeople
         instance.service.save()
       
@@ -171,7 +171,7 @@ def update_freeslots(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Reservation)
 def delete_reservation(sender, instance, *args, **kwargs):
     date = int(instance.bookDate)
-    time = instance.bookTime - instance.service.startTime - 1
+    time = instance.bookTime - instance.service.startTime
     instance.service.freeSlots[date][time] += instance.numPeople
     instance.service.save()
 
