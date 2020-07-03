@@ -48,6 +48,9 @@ class ReservationSerializer(serializers.ModelSerializer):
         # TODO: need to check if bookTime is within startTime and closeTime
         # if data['startTime'] > data['endTime']:
         #     raise serializers.ValidationError("startTime must occur before endTime")
+        service = Service.objects.get(name=data['service'])
+        if data['bookTime'] < service.startTime or data['bookTime'] > service.closeTime:
+            raise serializer.ValidationError
         return data
 
     def to_representation(self, instance):
