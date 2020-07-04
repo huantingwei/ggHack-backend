@@ -166,4 +166,3 @@ SITE_ID = 1
 AUTH_USER_MODEL = 'backend.User'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
 ACCOUNT_EMAIL_VERIFICATION = "none"   # none: no need for email verification for registration
-ACCOUNT_EMAIL_REQUIRED = (True)       # True: need email for registration
