@@ -65,7 +65,7 @@ class Service(models.Model):
     placeId = models.TextField()
     freeSlots = ArrayField(
         ArrayField(models.IntegerField(blank=True, null=True)),
-        blank=True, null=True,
+        blank=True, null=True
     )
     popularTimes = ArrayField(
         ArrayField(models.IntegerField(blank=True, null=True)),
@@ -75,17 +75,28 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if self.freeSlots and len(self.freeSlots) != 7:
+            openningHours = self.closeTime - self.startTime
+            freeslots = list()
+            for i in range(7):
+                freeslots.append([self.freeSlots[i][0] for i in range(i*openningHours, (i+1)*openningHours)])
+            self.freeSlots = freeslots
+        if self.popularTimes and len(self.popularTimes) != 7:
+            popularTimes = list()
+            for i in range(7):
+                popularTimes.append([self.popularTimes[i][0] for i in range(24)])
+            self.popularTimes = popularTimes
+            
+        super(Service, self).save(*args, **kwargs)
+
 
 def init_freeslots(instance):
     openningHours = instance.closeTime - instance.startTime
-    mon = [instance.maxCapacity for i in range(openningHours)]
-    tue = [instance.maxCapacity for i in range(openningHours)]
-    wed = [instance.maxCapacity for i in range(openningHours)]
-    thu = [instance.maxCapacity for i in range(openningHours)]
-    fri = [instance.maxCapacity for i in range(openningHours)]
-    sat = [instance.maxCapacity for i in range(openningHours)]
-    sun = [instance.maxCapacity for i in range(openningHours)]
-    return [mon, tue, wed, thu, fri, sat, sun]
+    freeslots = list()
+    for i in range(7):
+        freeslots.append([instance.maxCapacity for i in range(openningHours)])
+    return freeslots
 
 def get_place_detail(instance):
     try:
@@ -132,7 +143,6 @@ def get_popular_times(place_detail):
 def init_service(sender, instance, created, **kwargs):
     if created:
         instance.freeSlots = init_freeslots(instance)
-        
         place_detail = get_place_detail(instance)
         if place_detail is not None:
             place_detail = list(place_detail)
@@ -140,8 +150,8 @@ def init_service(sender, instance, created, **kwargs):
             instance.latitude = place_detail[1]
             instance.longitude = place_detail[2]
             instance.rating = place_detail[3]
-
         instance.save()
+
 #post_save.connect(init_service, sender=Service)
 
 
