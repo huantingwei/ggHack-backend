@@ -132,8 +132,10 @@ def get_popular_times(place_detail):
 def init_service(sender, instance, created, **kwargs):
     if created:
         instance.freeSlots = init_freeslots(instance)
-        place_detail = list(get_place_detail(instance))
-        if place_detail[0] is not None:
+        
+        place_detail = get_place_detail(instance)
+        if place_detail is not None:
+            place_detail = list(place_detail)
             instance.popularTimes = place_detail[0]
             instance.latitude = place_detail[1]
             instance.longitude = place_detail[2]
