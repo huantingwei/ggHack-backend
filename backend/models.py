@@ -87,8 +87,35 @@ def init_freeslots(instance):
     sun = [instance.maxCapacity for i in range(openningHours)]
     return [mon, tue, wed, thu, fri, sat, sun]
 
-def get_popular_times(instance):
-    place_detail = populartimes.get_id(API_KEY, instance.placeId)
+def get_place_detail(instance):
+    try:
+        place_detail = populartimes.get_id(API_KEY, instance.placeId)
+    except:
+        return None
+    
+    popular_times = get_popular_times(place_detail)
+    lat, lon = get_lat_lon(place_detail)
+    rating = get_rating(place_detail)
+
+    return popular_times, lat, lon, rating
+
+def get_rating(place_detail):
+    if 'rating' in place_detail.keys():
+        return place_detail['rating']
+    else:
+        return -1
+
+def get_lat_lon(place_detail):
+    if 'coordinates' in place_detail.keys():
+        lat = place_detail['coordinates']['lat']
+        lon = place_detail['coordinates']['lng']
+    else:
+        lat = 0
+        long = 0
+    return lat, lon
+
+def get_popular_times(place_detail):
+
     data = []
     if 'populartimes' in place_detail.keys():
         popular_times = place_detail['populartimes']
@@ -105,7 +132,13 @@ def get_popular_times(instance):
 def init_service(sender, instance, created, **kwargs):
     if created:
         instance.freeSlots = init_freeslots(instance)
-        instance.popularTimes = get_popular_times(instance)
+        place_detail = list(get_place_detail(instance))
+        if place_detail[0] is not None:
+            instance.popularTimes = place_detail[0]
+            instance.latitude = place_detail[1]
+            instance.longitude = place_detail[2]
+            instance.rating = place_detail[3]
+
         instance.save()
 #post_save.connect(init_service, sender=Service)
 
