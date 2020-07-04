@@ -3,7 +3,8 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import F
 from django.db.models.signals import post_save, pre_save, post_delete
-from django.dispatch import receiver
+from django.dispatch import receiver 
+from django.core.exceptions import ValidationError
 
 import populartimes
 API_KEY = 'AIzaSyAH-8I6T-mFTW_e_26ISDs8ChnVCSvKQRs'
@@ -157,9 +158,29 @@ class Reservation(models.Model):
     def __str__(self):
         return self.customer.username + ' : ' + self.service.name
 
+    # validation
+    def clean(self):
+        service = self.service
+        if not (self.bookTime >= service.startTime):
+            raise ValidationError('bookTime must be >= startTime')
 
-@receiver(post_save, sender = Reservation, dispatch_uid='update freeslots')
-def update_freeslots(sender, instance, created, **kwargs):
+        if not (service.closeTime > self.bookTime):
+            raise ValidationError('bookTime must be < closeTime')
+
+        date = self.bookDate
+        time = self.bookTime - service.startTime
+
+        if not (self.numPeople <= service.freeSlots[date][time]):
+            raise ValidationError('There is no enough free slots!')
+        
+        if not (self.numPeople >= 1):
+            raise ValidationError('numPeople should be at least 1!')
+
+        
+
+
+@receiver(post_save, sender = Reservation, dispatch_uid='reservation update freeslots')
+def reservation_update_freeslots(sender, instance, created, **kwargs):
     if instance and created:
         date = int(instance.bookDate)
         time = instance.bookTime - instance.service.startTime
@@ -173,4 +194,5 @@ def delete_reservation(sender, instance, *args, **kwargs):
     time = instance.bookTime - instance.service.startTime
     instance.service.freeSlots[date][time] += instance.numPeople
     instance.service.save()
+
 

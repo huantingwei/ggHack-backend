@@ -41,17 +41,17 @@ class ReservationSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = ['id', 'customer', 'service', 'serviceOwner', 'bookDate','bookTime', 'numPeople',  'status']
 
-    def validate(self, data):
+    #def validate(self, data):
         """
         Check that startTime is before endTime.
         """
         # TODO: need to check if bookTime is within startTime and closeTime
         # if data['startTime'] > data['endTime']:
         #     raise serializers.ValidationError("startTime must occur before endTime")
-        #service = Service.objects.get(name=data['service'])
-        #if data['bookTime'] < service.startTime or data['bookTime'] > service.closeTime:
+        # service = Service.objects.get(name=data['service'])
+        # if data['bookTime'] < service.startTime or data['bookTime'] > service.closeTime:
         #    raise serializer.ValidationError
-        return data
+        # return data
 
     def to_representation(self, instance):
         return {
