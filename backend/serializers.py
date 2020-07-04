@@ -24,16 +24,11 @@ class ServiceSerializer(serializers.ModelSerializer):
     
     def to_internal_value(self, data):
         ret = super().to_internal_value(data)
-        print(ret)
         return ret
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        try:
-            ret['popularTimes'] = PopularTimes.objects.get(pk=ret['popularTimes'])
-        except:
-            return ret
-        return ret
+    # def to_representation(self, instance):
+    #     ret = super().to_representation(instance)
+    #     return ret
 
 class ReservationSerializer(serializers.ModelSerializer):
 
