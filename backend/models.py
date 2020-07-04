@@ -90,15 +90,15 @@ def init_freeslots(instance):
 def get_popular_times(instance):
     place_detail = populartimes.get_id(API_KEY, instance.placeId)
     data = []
-    if place_detail['populartimes'] is not None:
+    if 'populartimes' in place_detail.keys():
         popular_times = place_detail['populartimes']
         for d in popular_times:
             data.append(d['data'])
         
         assert len(data) == 7 and len(data[0]) == 24, 'error in get_popular_times' 
     else:
-        raise ConnectionError('No populartimes available for this service')
-    print(data)
+        data = [[] for _ in range(7)]
+        
     return data
 
 @receiver(post_save, sender = Service, dispatch_uid='init service')
