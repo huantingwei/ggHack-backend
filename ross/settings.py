@@ -159,6 +159,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
     # 'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend',]
+    
+    # utf-8 encoding
+    'DEFAULT_RENDERER_CLASSES': [ 
+        # 'rest_framework.renderers.JSONRenderer',  # json渲染器
+        'backend.renders.Utf8JSONRenderer',  # json渲染器
+        'rest_framework.renderers.BrowsableAPIRenderer',  # 浏览API渲染器
+    ],
 }
 
 # required by rest_auth/all-auth
